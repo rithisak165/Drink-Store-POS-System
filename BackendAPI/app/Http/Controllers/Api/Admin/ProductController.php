@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage; // Import Storage
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -20,30 +21,35 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_id'  => 'required|exists:categories,id',
+            'category_id'  => 'nullable|integer',
             'name'         => 'required|string|max:255',
             'description'  => 'nullable|string',
             'is_available' => 'boolean',
-            'image'        => 'nullable|image|max:2048', // Validate as IMAGE file
+            'image'        => 'nullable|image|max:4096',
             'sizes'        => 'required|array|min:1',
             'sizes.*.size' => 'required|string',
             'sizes.*.price'=> 'required|numeric|min:0',
         ]);
 
+        // Auto-create a default category if none exists or category_id not provided
+        $category = Category::firstOrCreate(
+            ['name' => 'General'],
+            ['description' => 'Default category']
+        );
+        $categoryId = $validated['category_id'] ?? $category->id;
+
         // 1. Handle Image Upload
         $imagePath = null;
         if ($request->hasFile('image')) {
-            // Stores in storage/app/public/products
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
-        $product = DB::transaction(function () use ($validated, $imagePath) {
-            // 2. Create Product with image path
+        $product = DB::transaction(function () use ($validated, $imagePath, $categoryId) {
             $product = Product::create([
-                'category_id'  => $validated['category_id'],
+                'category_id'  => $categoryId,
                 'name'         => $validated['name'],
                 'description'  => $validated['description'] ?? null,
-                'image_url'    => $imagePath, // Save the path we just created
+                'image_url'    => $imagePath,
                 'is_available' => $validated['is_available'] ?? true,
             ]);
 
