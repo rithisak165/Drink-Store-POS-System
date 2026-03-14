@@ -9,7 +9,9 @@ import {
     Plus,
     Minus,
     Coffee,
-    ArrowRight
+    ArrowRight,
+    AlertCircle,
+    X
 } from 'lucide-react';
 
 export default function Cart() {
@@ -18,6 +20,7 @@ export default function Cart() {
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [orderId, setOrderId] = useState(null);
+    const [toast, setToast] = useState(null);
 
     // Safety: Ensure cart is an array
     const safeCart = Array.isArray(cart) ? cart : [];
@@ -25,12 +28,17 @@ export default function Cart() {
     // Calculate Grand Total
     const grandTotal = safeCart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
+    const showToast = (message, type = 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 4000);
+    };
+
     // Creates the pending order FIRST, then opens the modal
     const handleCheckout = async () => {
         if (safeCart.length === 0) return;
         if (!token) {
-            alert("🔒 Please log in or register to complete your checkout.");
-            navigate('/login');
+            showToast("Please log in or register to complete your checkout.");
+            setTimeout(() => navigate('/login'), 1500);
             return;
         }
 
@@ -58,9 +66,10 @@ export default function Cart() {
             console.error("Checkout Error:", err);
             setLoading(false);
             const message = err.response?.data?.message || "Failed to place order.";
-            alert("⚠️ " + message);
+            showToast(message);
         }
     };
+
 
     const handlePaymentFinished = () => {
         localStorage.removeItem('CART_ITEMS');
@@ -90,6 +99,17 @@ export default function Cart() {
     // 🟢 ACTIVE CART STATE
     return (
         <>
+            {/* Toast Notification */}
+            {toast && (
+                <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-semibold transition-all animate-fadeIn
+                    ${toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    <AlertCircle size={18} className="shrink-0" />
+                    <span>{toast.message}</span>
+                    <button onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100 transition">
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
             <div className="w-full max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white/40 shadow-sm">

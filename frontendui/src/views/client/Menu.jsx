@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../../axios-client";
 import { useStateContext } from "../../contexts/ContextProvider";
-import { Search, X, Coffee, Filter, ArrowRight, Lock, Clock } from "lucide-react";
+import { Search, X, Coffee, Filter, ArrowRight, Lock, Clock, AlertCircle } from "lucide-react";
 
 export default function Menu() {
     const [products, setProducts] = useState([]);
@@ -27,6 +27,12 @@ export default function Menu() {
     const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    const showToast = (message) => {
+        setToast(message);
+        setTimeout(() => setToast(null), 3500);
+    };
 
     // 1. Fetch Data on Mount
     useEffect(() => {
@@ -149,12 +155,12 @@ export default function Menu() {
 
     const handleConfirmAdd = () => {
         if (!isStoreOpen) {
-            alert("Sorry, the store is currently closed.");
+            showToast("Sorry, the store is currently closed.");
             return;
         }
 
         if (!selectedSize && selectedProduct.sizes.length > 0) {
-            alert("Please select a size");
+            showToast("Please select a size.");
             return;
         }
 
@@ -183,6 +189,17 @@ export default function Menu() {
 
     return (
         <div className="w-full min-h-screen pb-20 font-sans">
+
+            {/* Toast Notification */}
+            {toast && (
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl bg-red-500 text-white text-sm font-semibold animate-fadeIn">
+                    <AlertCircle size={18} className="shrink-0" />
+                    <span>{toast}</span>
+                    <button onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100 transition">
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
             
             {/* --- HERO HEADER --- */}
             <div className="bg-white pt-10 pb-8 px-4 mb-4 rounded-2xl shadow-lg relative overflow-hidden">

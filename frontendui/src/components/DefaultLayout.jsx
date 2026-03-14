@@ -31,11 +31,10 @@ export default function DefaultLayout() {
             .then(() => {
                 setUser({});
                 setToken(null);
-                closeMenu(); // Close mobile menu if open
             })
             .catch(err => {
                 console.error(err);
-                // Even if API fails, clear local state to "force" logout on frontend
+                // Even if API fails, clear local state to force logout on frontend
                 setUser({});
                 setToken(null);
             });

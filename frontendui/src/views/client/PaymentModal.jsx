@@ -256,13 +256,15 @@ export default function PaymentModal({ total, orderId, onPaymentFinished, onCanc
                                     Awaiting payment completion...
                                 </div>
                                 
-                                <button
-                                    onClick={handleSimulatePayment}
-                                    disabled={loading || timeLeft <= 0}
-                                    className="pt-4 pb-2 text-xs text-center font-semibold text-gray-400 hover:text-amber-600 transition"
-                                >
-                                    🛠️ Developer: Simulate Webhook Payment
-                                </button>
+                                {import.meta.env.DEV && (
+                                    <button
+                                        onClick={handleSimulatePayment}
+                                        disabled={loading || timeLeft <= 0}
+                                        className="pt-4 pb-2 text-xs text-center font-semibold text-gray-400 hover:text-amber-600 transition"
+                                    >
+                                        🛠️ Dev Only: Simulate Webhook Payment
+                                    </button>
+                                )}
                             </div>
                         </>
                     )}

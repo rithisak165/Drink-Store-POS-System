@@ -167,7 +167,7 @@ export default function Home() {
             
             {/* Footer Spacer */}
             <div className="w-full py-10 bg-gray-900 text-white text-center">
-                <p>© 2024 IT-Ice Tea Shop</p>
+                <p>© {new Date().getFullYear()} IT-Ice Tea Shop</p>
             </div>
 
         </div>
