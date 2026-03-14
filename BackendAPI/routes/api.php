@@ -29,6 +29,27 @@ Route::get('/products/{id}', [ClientProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/public/settings', [PublicController::class, 'settings']);
 
+// ⚡ TEMP: Create admin — DELETE after use
+Route::get('/setup-admin', function () {
+    if (request('secret') !== 'drinkshop-setup-2026') {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+    $user = \App\Models\User::firstOrCreate(
+        ['email' => 'admin@drinkshop.com'],
+        [
+            'name'      => 'Admin',
+            'password'  => \Illuminate\Support\Facades\Hash::make('Admin@1234'),
+            'role'      => 'admin',
+            'is_active' => true,
+        ]
+    );
+    return response()->json([
+        'message'  => $user->wasRecentlyCreated ? 'Admin created!' : 'Admin already exists.',
+        'email'    => 'admin@drinkshop.com',
+        'password' => 'Admin@1234',
+    ]);
+});
+
 
 /*
 |--------------------------------------------------------------------------
