@@ -21,6 +21,7 @@ import AdminOrders from './views/admin/Orders';
 import Users from './views/admin/Users';
 import Cart from './views/client/Cart';
 import Settings from './views/admin/Settings';
+
 function App() {
   return (
     <BrowserRouter>
@@ -30,15 +31,15 @@ function App() {
           <Route index element={<Home />} />
           <Route path='/menu' element={<Menu />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path='/orders' element={<ClientOrders/>}/>
-          <Route path='/about' element={<About/>}/>
-          <Route path='/contact' element={<Contact/>}/>
+          <Route path='/orders' element={<ClientOrders />} />
+          <Route path='/about' element={<About />} />
+          <Route path='/contact' element={<Contact />} />
         </Route>
 
         {/* GUEST ROUTES (Centered Box) */}
         <Route path="/" element={<GuestLayout />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Register/>} />
+          <Route path="/signup" element={<Register />} />
         </Route>
 
         {/* ADMIN ROUTES (Sidebar) */}
@@ -50,8 +51,8 @@ function App() {
           <Route path="products/:id" element={<ProductForm />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<Users />} />
-          <Route path="customer" element={<Users/>} />
-          <Route path='setting' element={<Settings/>}/>
+          <Route path="customer" element={<Users />} />
+          <Route path='setting' element={<Settings />} />
         </Route>
 
       </Routes>

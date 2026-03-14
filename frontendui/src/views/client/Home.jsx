@@ -10,12 +10,11 @@ export default function Home() {
     useEffect(() => {
         const fetchTrending = async () => {
             try {
-                const { data } = await axiosClient.get('/products');
-                const allProducts = data.data ? data.data : data;
+                // Request sorted top sellers and limited to 3 items
+                const { data } = await axiosClient.get('/products?sort=top_sellers&limit=3');
+                const topProducts = data.data ? data.data : data;
                 
-                // 🟢 LOGIC: Take the first 3 items to show as "Trending"
-                // You can change .slice(0,3) to any logic you want (e.g., random)
-                setTrendingProducts(allProducts.slice(0, 3));
+                setTrendingProducts(topProducts);
             } catch (error) {
                 console.error("Failed to fetch products", error);
             } finally {

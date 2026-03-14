@@ -53,4 +53,10 @@ class Product extends Model
     {
         return $this->hasMany(ProductSize::class);
     }
+
+    // Relationship: A product has many order items
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }

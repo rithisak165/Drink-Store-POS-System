@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "http://127.0.0.1:8000/api", // The address of your Laravel API
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api", // Uses environment variable or defaults to local
 });
 
 // REQUEST INTERCEPTOR (Outgoing)

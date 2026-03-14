@@ -38,7 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/client/orders', [ClientOrderController::class, 'store']);
+    Route::get('/client/orders/{id}/status', [ClientOrderController::class, 'status']);
 });
+
+// Real webhooks shouldn't require user authentication (bank sends this)
+Route::post('/client/orders/{id}/webhook', [ClientOrderController::class, 'webhook']);
 
 /*
 |--------------------------------------------------------------------------

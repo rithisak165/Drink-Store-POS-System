@@ -34,6 +34,17 @@ class ProductController extends Controller
             $query->where('name', 'LIKE', "%{$search}%");
         }
 
+        // 5. SORT: Top sellers
+        if ($request->query('sort') === 'top_sellers') {
+            $query->withSum('orderItems', 'quantity')
+                  ->orderByDesc('order_items_sum_quantity');
+        }
+
+        // 6. LIMIT
+        if ($request->has('limit')) {
+            $query->limit($request->query('limit'));
+        }
+
         $products = $query->get();
 
         return response()->json([

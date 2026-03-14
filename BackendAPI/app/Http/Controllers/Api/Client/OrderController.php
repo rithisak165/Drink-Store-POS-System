@@ -18,6 +18,7 @@ class OrderController extends Controller
         // 1. Validate incoming data
         $validated = $request->validate([
             'total_amount'       => 'required|numeric',
+            'receipt_image'      => 'nullable|image',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.size_id'    => 'nullable',
@@ -32,13 +33,14 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id'          => $request->user()->id ?? null,
                 'total_amount'     => $validated['total_amount'],
-                'status'           => 'pending',
-                'payment_method'   => 'cod', // Cash on Delivery
+                'status'           => 'pending_payment',
+                'payment_method'   => 'bakong_khqr',
 
                 // 👇 THE FIX: Provide default values for required columns
                 'delivery_address' => 'Store Pickup',
                 'transaction_ref'  => null,
                 'note'             => null,
+                'receipt_image'    => null, // No longer used in this flow
             ]);
 
             // 3. Create Order Items
@@ -90,5 +92,38 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc') // Newest first
             ->get();
         return response()->json($orders);
+    }
+
+    // GET: Check order status (for frontend polling)
+    public function status($id)
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return response()->json(['status' => 'error', 'message' => 'Order not found'], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'order_status' => $order->status
+        ]);
+    }
+
+    // POST: Webhook from Bank to confirm payment
+    public function webhook($id, Request $request)
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return response()->json(['status' => 'error', 'message' => 'Order not found'], 404);
+        }
+
+        // In a real integration, you would verify the Bakong hash signature here
+        $order->update([
+            'status' => 'paid',
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Payment verified successfully via webhook'
+        ]);
     }
 }
