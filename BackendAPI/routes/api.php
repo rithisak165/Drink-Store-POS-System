@@ -50,6 +50,27 @@ Route::get('/setup-admin', function () {
     ]);
 });
 
+// ⚡ TEMP: Force-fix admin role — DELETE after use
+Route::get('/fix-admin', function () {
+    if (request('secret') !== 'drinkshop-setup-2026') {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+    $user = \App\Models\User::where('email', 'admin@drinkshop.com')->first();
+    if (!$user) {
+        return response()->json(['error' => 'User not found. Use /setup-admin first.'], 404);
+    }
+    $user->role      = 'admin';
+    $user->is_active = true;
+    $user->password  = \Illuminate\Support\Facades\Hash::make('Admin@1234');
+    $user->save();
+    return response()->json([
+        'message'  => 'Admin role fixed!',
+        'email'    => $user->email,
+        'role'     => $user->role,
+        'password' => 'Admin@1234',
+    ]);
+});
+
 
 /*
 |--------------------------------------------------------------------------
