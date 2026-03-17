@@ -30,9 +30,9 @@ export default function Contact() {
     };
 
     return (
-        <div className="relative min-h-screen font-sans text-gray-900 scroll-smooth flex items-center justify-center p-4">
+        <div className="relative min-h-screen font-sans text-gray-900 scroll-smooth py-8 px-4 flex items-center justify-center">
             {/* 🟢 MAIN CARD CONTAINER */}
-            <div className="relative z-10 w-full max-w-5xl bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px] border border-white/60 animate-fadeIn">
+            <div className="relative z-10 w-full max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px] border border-gray-100">
                 
                 {/* LEFT SIDE: CONTACT INFO (Dark Theme) */}
                 <div className="md:w-5/12 bg-gray-900 text-white p-10 flex flex-col justify-between relative overflow-hidden">

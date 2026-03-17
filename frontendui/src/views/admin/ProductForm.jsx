@@ -113,11 +113,18 @@ export default function ProductForm({ onSuccess, productToEdit }) {
                 })
                 .catch(err => {
                     setLoading(false);
+                    console.error('Product creation error:', err.response);
                     if (err.response && err.response.status === 422) {
                         setErrors(err.response.data.errors);
+                    } else if (err.response && err.response.data) {
+                        // Show the actual server error message in the form's error box
+                        const msg = err.response.data.message || err.response.data.detail || 'Unknown server error.';
+                        const detail = err.response.data.detail || '';
+                        setErrors({ 
+                            server: [`Error ${err.response.status}: ${msg}`, detail ? `Detail: ${detail}` : ''].filter(Boolean)
+                        });
                     } else {
-                        console.error(err);
-                        alert("Failed to create product.");
+                        setErrors({ server: ['Network error: Could not reach the server. Check your connection.'] });
                     }
                 });
         }

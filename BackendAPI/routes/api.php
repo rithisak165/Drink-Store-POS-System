@@ -50,6 +50,37 @@ Route::get('/setup-admin', function () {
     ]);
 });
 
+// ⚡ TEMP: Test product creation (no auth needed) — DELETE after use
+Route::get('/test-product', function () {
+    if (request('secret') !== 'drinkshop-setup-2026') {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+    try {
+        $category = \App\Models\Category::firstOrCreate(
+            ['slug' => 'general'],
+            ['name' => 'General', 'is_active' => true]
+        );
+        $product = \App\Models\Product::create([
+            'category_id'  => $category->id,
+            'name'         => 'Test Green Tea',
+            'description'  => 'A refreshing green tea.',
+            'image_url'    => null,
+            'is_available' => true,
+        ]);
+        $product->sizes()->create(['size' => 'Small', 'price' => 1.75]);
+        $product->sizes()->create(['size' => 'Medium', 'price' => 2.50]);
+        return response()->json([
+            'message' => 'Test product created successfully!',
+            'product' => $product->load('sizes'),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error'  => $e->getMessage(),
+            'detail' => $e->getTraceAsString(),
+        ], 500);
+    }
+});
+
 // ⚡ TEMP: Force-fix admin role — DELETE after use
 Route::get('/fix-admin', function () {
     if (request('secret') !== 'drinkshop-setup-2026') {

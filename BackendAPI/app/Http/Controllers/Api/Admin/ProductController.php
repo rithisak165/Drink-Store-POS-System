@@ -32,35 +32,58 @@ class ProductController extends Controller
         ]);
 
         // Auto-create a default category if none exists or category_id not provided
-        $category = Category::firstOrCreate(
-            ['name' => 'General'],
-            ['description' => 'Default category']
-        );
-        $categoryId = $validated['category_id'] ?? $category->id;
-
-        // 1. Handle Image Upload
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
+        try {
+            $category = Category::where('slug', 'general')->first();
+            if (!$category) {
+                $category = new Category();
+                $category->slug      = 'general';
+                $category->name      = 'General';
+                $category->is_active = true;
+                $category->save();
+            }
+            $categoryId = $validated['category_id'] ?? $category->id;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Category error: ' . $e->getMessage());
+            $categoryId = $validated['category_id'] ?? null;
         }
 
-        $product = DB::transaction(function () use ($validated, $imagePath, $categoryId) {
-            $product = Product::create([
-                'category_id'  => $categoryId,
-                'name'         => $validated['name'],
-                'description'  => $validated['description'] ?? null,
-                'image_url'    => $imagePath,
-                'is_available' => $validated['is_available'] ?? true,
-            ]);
-
-            foreach ($validated['sizes'] as $sizeData) {
-                $product->sizes()->create([
-                    'size'  => $sizeData['size'],
-                    'price' => $sizeData['price']
-                ]);
+        // 1. Handle Image Upload — wrap in try/catch so it never crashes
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            try {
+                $imagePath = $request->file('image')->store('products', 'public');
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Image upload failed, continuing without image: ' . $e->getMessage());
+                // Continue without image — product can still be created
             }
-            return $product;
-        });
+        }
+
+        try {
+            $product = DB::transaction(function () use ($validated, $imagePath, $categoryId) {
+                $product = Product::create([
+                    'category_id'  => $categoryId,
+                    'name'         => $validated['name'],
+                    'description'  => $validated['description'] ?? null,
+                    'image_url'    => $imagePath,
+                    'is_available' => $validated['is_available'] ?? true,
+                ]);
+
+                foreach ($validated['sizes'] as $sizeData) {
+                    $product->sizes()->create([
+                        'size'  => $sizeData['size'],
+                        'price' => $sizeData['price']
+                    ]);
+                }
+                return $product;
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Product creation DB error: ' . $e->getMessage());
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to save product to database.',
+                'detail'  => $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json(['status' => 'success', 'data' => $product->load('sizes')], 201);
     }
